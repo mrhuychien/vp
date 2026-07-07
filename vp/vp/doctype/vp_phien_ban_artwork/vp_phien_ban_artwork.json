@@ -1,0 +1,189 @@
+{
+ "actions": [],
+ "allow_rename": 0,
+ "creation": "2026-01-01 00:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "artwork",
+  "so_phien_ban",
+  "trang_thai",
+  "ngay_duyet_in",
+  "tep_goc",
+  "tep_preview",
+  "lien_ket_tccs",
+  "ly_do_thay_doi"
+ ],
+ "fields": [
+  {
+   "fieldname": "artwork",
+   "fieldtype": "Link",
+   "label": "Artwork",
+   "options": "VP Artwork",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "so_phien_ban",
+   "fieldtype": "Data",
+   "label": "S\u1ed1 phi\u00ean b\u1ea3n",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "trang_thai",
+   "fieldtype": "Select",
+   "label": "Tr\u1ea1ng th\u00e1i",
+   "options": "Thiet Ke\nDang In\nNgung In",
+   "default": "Thiet Ke",
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "ngay_duyet_in",
+   "fieldtype": "Date",
+   "label": "Ng\u00e0y duy\u1ec7t in"
+  },
+  {
+   "fieldname": "tep_goc",
+   "fieldtype": "Attach",
+   "label": "T\u1ec7p g\u1ed1c (AI/PDF)"
+  },
+  {
+   "fieldname": "tep_preview",
+   "fieldtype": "Attach Image",
+   "label": "T\u1ec7p preview (\u1ea3nh)"
+  },
+  {
+   "fieldname": "lien_ket_tccs",
+   "fieldtype": "Link",
+   "label": "Li\u00ean k\u1ebft TCCS",
+   "options": "VP Van Ban"
+  },
+  {
+   "fieldname": "ly_do_thay_doi",
+   "fieldtype": "Small Text",
+   "label": "L\u00fd do thay \u0111\u1ed5i"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-01-01 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "VP",
+ "name": "VP Phien Ban Artwork",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "role": "System Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1,
+   "report": 1,
+   "export": 1,
+   "import": 1,
+   "print": 1,
+   "email": 1,
+   "share": 1,
+   "submit": 0,
+   "cancel": 0,
+   "amend": 0,
+   "permlevel": 0,
+   "if_owner": 0
+  },
+  {
+   "role": "VP Quan Tri",
+   "read": 1,
+   "report": 1,
+   "export": 1,
+   "print": 1,
+   "email": 1,
+   "share": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1,
+   "submit": 0,
+   "cancel": 0,
+   "amend": 0,
+   "permlevel": 0,
+   "if_owner": 0
+  },
+  {
+   "role": "VP Bien Tap",
+   "read": 1,
+   "report": 1,
+   "export": 1,
+   "print": 1,
+   "email": 1,
+   "share": 0,
+   "write": 0,
+   "create": 0,
+   "delete": 0,
+   "submit": 0,
+   "cancel": 0,
+   "amend": 0,
+   "permlevel": 0,
+   "if_owner": 0
+  },
+  {
+   "role": "VP QC",
+   "read": 1,
+   "report": 1,
+   "export": 1,
+   "print": 1,
+   "email": 1,
+   "share": 0,
+   "write": 0,
+   "create": 0,
+   "delete": 0,
+   "submit": 0,
+   "cancel": 0,
+   "amend": 0,
+   "permlevel": 0,
+   "if_owner": 0
+  },
+  {
+   "role": "VP Marketing",
+   "read": 1,
+   "report": 1,
+   "export": 1,
+   "print": 1,
+   "email": 1,
+   "share": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 0,
+   "submit": 0,
+   "cancel": 0,
+   "amend": 0,
+   "permlevel": 0,
+   "if_owner": 0
+  },
+  {
+   "role": "VP Xem",
+   "read": 1,
+   "report": 1,
+   "export": 1,
+   "print": 1,
+   "email": 1,
+   "share": 0,
+   "write": 0,
+   "create": 0,
+   "delete": 0,
+   "submit": 0,
+   "cancel": 0,
+   "amend": 0,
+   "permlevel": 0,
+   "if_owner": 0
+  }
+ ],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1,
+ "autoname": "format:{artwork}-v{so_phien_ban}",
+ "naming_rule": "Expression"
+}

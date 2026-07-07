@@ -1,0 +1,211 @@
+{
+ "actions": [],
+ "allow_rename": 0,
+ "creation": "2026-01-01 00:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "item",
+  "supplier",
+  "loai_ho_so",
+  "ten_ho_so",
+  "so_hieu",
+  "ngay_cap",
+  "ngay_het_han",
+  "tep",
+  "trang_thai",
+  "ghi_chu"
+ ],
+ "fields": [
+  {
+   "fieldname": "item",
+   "fieldtype": "Link",
+   "label": "Nguy\u00ean v\u1eadt li\u1ec7u (Item)",
+   "options": "Item",
+   "reqd": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "supplier",
+   "fieldtype": "Link",
+   "label": "Nh\u00e0 cung c\u1ea5p",
+   "options": "Supplier",
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "loai_ho_so",
+   "fieldtype": "Select",
+   "label": "Lo\u1ea1i h\u1ed3 s\u01a1",
+   "options": "Tu Cong Bo\nCoA\nKiem Nghiem Dinh Ky\nHop Dong\nChung Nhan NCC\nKhac",
+   "reqd": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "ten_ho_so",
+   "fieldtype": "Data",
+   "label": "T\u00ean h\u1ed3 s\u01a1",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "so_hieu",
+   "fieldtype": "Data",
+   "label": "S\u1ed1 hi\u1ec7u"
+  },
+  {
+   "fieldname": "ngay_cap",
+   "fieldtype": "Date",
+   "label": "Ng\u00e0y c\u1ea5p"
+  },
+  {
+   "fieldname": "ngay_het_han",
+   "fieldtype": "Date",
+   "label": "Ng\u00e0y h\u1ebft h\u1ea1n",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "tep",
+   "fieldtype": "Attach",
+   "label": "T\u1ec7p \u0111\u00ednh k\u00e8m",
+   "reqd": 1
+  },
+  {
+   "fieldname": "trang_thai",
+   "fieldtype": "Select",
+   "label": "Tr\u1ea1ng th\u00e1i",
+   "options": "Con Hieu Luc\nSap Het Han\nHet Han",
+   "default": "Con Hieu Luc",
+   "read_only": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "ghi_chu",
+   "fieldtype": "Small Text",
+   "label": "Ghi ch\u00fa"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-01-01 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "VP",
+ "name": "VP Ho So NVL",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "role": "System Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1,
+   "report": 1,
+   "export": 1,
+   "import": 1,
+   "print": 1,
+   "email": 1,
+   "share": 1,
+   "submit": 0,
+   "cancel": 0,
+   "amend": 0,
+   "permlevel": 0,
+   "if_owner": 0
+  },
+  {
+   "role": "VP Quan Tri",
+   "read": 1,
+   "report": 1,
+   "export": 1,
+   "print": 1,
+   "email": 1,
+   "share": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1,
+   "submit": 0,
+   "cancel": 0,
+   "amend": 0,
+   "permlevel": 0,
+   "if_owner": 0
+  },
+  {
+   "role": "VP Bien Tap",
+   "read": 1,
+   "report": 1,
+   "export": 1,
+   "print": 1,
+   "email": 1,
+   "share": 0,
+   "write": 0,
+   "create": 0,
+   "delete": 0,
+   "submit": 0,
+   "cancel": 0,
+   "amend": 0,
+   "permlevel": 0,
+   "if_owner": 0
+  },
+  {
+   "role": "VP QC",
+   "read": 1,
+   "report": 1,
+   "export": 1,
+   "print": 1,
+   "email": 1,
+   "share": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 0,
+   "submit": 0,
+   "cancel": 0,
+   "amend": 0,
+   "permlevel": 0,
+   "if_owner": 0
+  },
+  {
+   "role": "VP Marketing",
+   "read": 1,
+   "report": 1,
+   "export": 1,
+   "print": 1,
+   "email": 1,
+   "share": 0,
+   "write": 0,
+   "create": 0,
+   "delete": 0,
+   "submit": 0,
+   "cancel": 0,
+   "amend": 0,
+   "permlevel": 0,
+   "if_owner": 0
+  },
+  {
+   "role": "VP Xem",
+   "read": 1,
+   "report": 1,
+   "export": 1,
+   "print": 1,
+   "email": 1,
+   "share": 0,
+   "write": 0,
+   "create": 0,
+   "delete": 0,
+   "submit": 0,
+   "cancel": 0,
+   "amend": 0,
+   "permlevel": 0,
+   "if_owner": 0
+  }
+ ],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1,
+ "autoname": "format:NVL-{YYYY}-{####}",
+ "naming_rule": "Expression",
+ "title_field": "ten_ho_so",
+ "show_title_field_in_link": 1
+}

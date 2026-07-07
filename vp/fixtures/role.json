@@ -1,0 +1,57 @@
+[
+ {
+  "doctype": "Role",
+  "name": "VP Quan Tri",
+  "role_name": "VP Quan Tri",
+  "desk_access": 1,
+  "disabled": 0,
+  "is_custom": 1,
+  "restrict_to_domain": null,
+  "home_page": null,
+  "two_factor_auth": 0
+ },
+ {
+  "doctype": "Role",
+  "name": "VP Bien Tap",
+  "role_name": "VP Bien Tap",
+  "desk_access": 1,
+  "disabled": 0,
+  "is_custom": 1,
+  "restrict_to_domain": null,
+  "home_page": null,
+  "two_factor_auth": 0
+ },
+ {
+  "doctype": "Role",
+  "name": "VP QC",
+  "role_name": "VP QC",
+  "desk_access": 1,
+  "disabled": 0,
+  "is_custom": 1,
+  "restrict_to_domain": null,
+  "home_page": null,
+  "two_factor_auth": 0
+ },
+ {
+  "doctype": "Role",
+  "name": "VP Marketing",
+  "role_name": "VP Marketing",
+  "desk_access": 1,
+  "disabled": 0,
+  "is_custom": 1,
+  "restrict_to_domain": null,
+  "home_page": null,
+  "two_factor_auth": 0
+ },
+ {
+  "doctype": "Role",
+  "name": "VP Xem",
+  "role_name": "VP Xem",
+  "desk_access": 1,
+  "disabled": 0,
+  "is_custom": 1,
+  "restrict_to_domain": null,
+  "home_page": null,
+  "two_factor_auth": 0
+ }
+]

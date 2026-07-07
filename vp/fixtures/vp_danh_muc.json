@@ -1,0 +1,7 @@
+[
+ {"doctype": "VP Danh Muc", "name": "Hành chính - Nhân sự", "ten_danh_muc": "Hành chính - Nhân sự", "parent_vp_danh_muc": null, "is_group": 1, "thu_tu": 10, "mo_ta": null},
+ {"doctype": "VP Danh Muc", "name": "Sản xuất", "ten_danh_muc": "Sản xuất", "parent_vp_danh_muc": null, "is_group": 1, "thu_tu": 20, "mo_ta": null},
+ {"doctype": "VP Danh Muc", "name": "QC - ATTP", "ten_danh_muc": "QC - ATTP", "parent_vp_danh_muc": null, "is_group": 1, "thu_tu": 30, "mo_ta": null},
+ {"doctype": "VP Danh Muc", "name": "Kinh doanh", "ten_danh_muc": "Kinh doanh", "parent_vp_danh_muc": null, "is_group": 1, "thu_tu": 40, "mo_ta": null},
+ {"doctype": "VP Danh Muc", "name": "Tài chính - Kế toán", "ten_danh_muc": "Tài chính - Kế toán", "parent_vp_danh_muc": null, "is_group": 1, "thu_tu": 50, "mo_ta": null}
+]

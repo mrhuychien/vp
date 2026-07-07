@@ -1,0 +1,11 @@
+[
+ {"doctype": "VP Loai Van Ban", "name": "QD", "ma_viet_tat": "QD", "ten_loai": "Quyết định", "mo_ta": null},
+ {"doctype": "VP Loai Van Ban", "name": "TB", "ma_viet_tat": "TB", "ten_loai": "Thông báo", "mo_ta": null},
+ {"doctype": "VP Loai Van Ban", "name": "QC", "ma_viet_tat": "QC", "ten_loai": "Quy chế", "mo_ta": null},
+ {"doctype": "VP Loai Van Ban", "name": "QT", "ma_viet_tat": "QT", "ten_loai": "Quy trình", "mo_ta": null},
+ {"doctype": "VP Loai Van Ban", "name": "SOP", "ma_viet_tat": "SOP", "ten_loai": "SOP", "mo_ta": null},
+ {"doctype": "VP Loai Van Ban", "name": "BM", "ma_viet_tat": "BM", "ten_loai": "Biểu mẫu", "mo_ta": null},
+ {"doctype": "VP Loai Van Ban", "name": "TCCS", "ma_viet_tat": "TCCS", "ten_loai": "Tiêu chuẩn cơ sở", "mo_ta": null},
+ {"doctype": "VP Loai Van Ban", "name": "HD", "ma_viet_tat": "HD", "ten_loai": "Hướng dẫn", "mo_ta": null},
+ {"doctype": "VP Loai Van Ban", "name": "CV", "ma_viet_tat": "CV", "ten_loai": "Công văn", "mo_ta": null}
+]
