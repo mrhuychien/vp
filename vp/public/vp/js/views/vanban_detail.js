@@ -1,7 +1,7 @@
 import { call, uploadFile, fileUrl } from '../api.js';
 import {
   html, raw, escapeHtml, badge, formatDate, statusLabel, skeleton, emptyState,
-  toast, showModal, closeModal, showLoading, hideLoading,
+  toast, showModal, closeModal, confirmDialog, showLoading, hideLoading,
 } from '../ui.js';
 
 export async function render({ container, params, boot, setTitle }) {
@@ -25,6 +25,8 @@ export async function render({ container, params, boot, setTitle }) {
   function paint(vb) {
     const issued = vb.trang_thai === 'Da Ban Hanh';
     const fileHref = vb.tep_dinh_kem || vb.lien_ket_ngoai;
+    const qrName = 'qr-' + String(vb.ma_hieu || 'vanban').replace(/[^\w.-]/g, '_') + '.png';
+    const limit = vb.gioi_han_truy_cap || 5;
 
     const publicBlock = issued && vb.public_url ? html`
       <div class="vp-card vp-mb-3">
@@ -33,7 +35,15 @@ export async function render({ container, params, boot, setTitle }) {
           <input class="vp-input" id="vp-pub" readonly value="${vb.public_url}" />
           <button class="vp-btn-brass vp-btn-sm" id="vp-copy">Sao chép</button>
         </div>
-        ${fileHref ? raw(`<a class="vp-download-cta" href="${escapeHtml(fileUrl(fileHref))}" target="_blank" rel="noopener">⬇️ Xem / Tải văn bản</a>`) : ''}
+        <div class="vp-qr-row vp-mt-3">
+          ${vb.public_qr ? raw(`<img class="vp-qr" src="${escapeHtml(vb.public_qr)}" alt="QR" width="120" height="120">`) : ''}
+          <div class="vp-grow">
+            <div class="vp-text-sm">Giới hạn xem/tải: <b>còn ${vb.con_lai == null ? '—' : vb.con_lai}/${limit} lượt</b></div>
+            ${vb.public_qr ? raw(`<a class="vp-file-link vp-mt-2" href="${escapeHtml(vb.public_qr)}" download="${escapeHtml(qrName)}">⬇️ Tải mã QR</a>`) : ''}
+            ${canEdit ? raw('<div class="vp-mt-2"><button class="vp-btn-ghost vp-btn-sm" id="vp-caplai">Cấp lại link (mới)</button></div>') : ''}
+          </div>
+        </div>
+        ${fileHref ? raw(`<a class="vp-download-cta" href="${escapeHtml(fileUrl(fileHref))}" target="_blank" rel="noopener">⬇️ Xem/tải bản gốc (nội bộ, không tính lượt)</a>`) : ''}
       </div>` : '';
 
     const capSoBlock = !issued && vb.trang_thai !== 'Huy' ? html`
@@ -82,6 +92,21 @@ export async function render({ container, params, boot, setTitle }) {
       if (navigator.clipboard) navigator.clipboard.writeText(inp.value).then(done, () => { document.execCommand('copy'); done(); });
       else { document.execCommand('copy'); done(); }
     });
+    const caplai = container.querySelector('#vp-caplai');
+    if (caplai) caplai.addEventListener('click', () => {
+      confirmDialog({
+        title: 'Cấp lại link',
+        message: 'Tạo link + QR mới và đặt lại lượt xem/tải về 0. Link/QR cũ sẽ ngừng hoạt động.',
+        confirmText: 'Cấp lại',
+        onConfirm: async () => {
+          showLoading('Đang cấp lại link…');
+          try {
+            await call('vp.api.vanban.cap_lai_link', { name: vb.name });
+            hideLoading(); toast('Đã cấp lại link', 'success'); load();
+          } catch (e) { hideLoading(); toast(e.message, 'error'); }
+        },
+      });
+    });
     const bh = container.querySelector('#vp-banhanh');
     if (bh) bh.addEventListener('click', () => openBanHanh(vb, load));
     const ed = container.querySelector('#vp-edit');
@@ -116,8 +141,9 @@ function openBanHanh(vb, onDone) {
         showLoading('Đang ban hành…');
         try {
           if (file) {
-            // Public file so the /vb/<token> link works for external recipients.
-            await uploadFile({ file, doctype: 'VP Van Ban', docname: vb.name, fieldname: 'tep_dinh_kem', isPrivate: 0 });
+            // Keep the scan PRIVATE — external viewers only reach it through the
+            // counted endpoint vp.api.public.tai (enforces the view/download limit).
+            await uploadFile({ file, doctype: 'VP Van Ban', docname: vb.name, fieldname: 'tep_dinh_kem', isPrivate: 1 });
           }
           await call('vp.api.vanban.ban_hanh', { name: vb.name, lien_ket_ngoai: link || null });
           hideLoading(); closeModal(); toast('Đã ban hành ' + vb.ma_hieu, 'success'); onDone();

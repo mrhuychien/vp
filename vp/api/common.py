@@ -49,6 +49,45 @@ def _paginate(page=1, page_size=20):
     return page_size, (page - 1) * page_size
 
 
+def qr_data_uri(url, scale=4):
+    """Return a base64 PNG data-URI QR code for `url`, or None if unavailable.
+
+    Tries several QR backends so it works on whatever a given bench has:
+    pyqrcode (Frappe 2FA dep) → segno (pure-python) → qrcode+Pillow. Fails soft —
+    the link still works without the image.
+    """
+    if not url:
+        return None
+    import base64
+    import io
+
+    # 1) pyqrcode (+ pypng)
+    try:
+        import pyqrcode
+        return "data:image/png;base64," + pyqrcode.create(url, error="M").png_as_base64_str(scale=scale)
+    except Exception:
+        pass
+
+    # 2) segno (pure-python, no external deps)
+    try:
+        import segno
+        buf = io.BytesIO()
+        segno.make(url, error="m").save(buf, kind="png", scale=scale)
+        return "data:image/png;base64," + base64.b64encode(buf.getvalue()).decode()
+    except Exception:
+        pass
+
+    # 3) qrcode (+ Pillow)
+    try:
+        import qrcode
+        buf = io.BytesIO()
+        qrcode.make(url).save(buf, format="PNG")
+        return "data:image/png;base64," + base64.b64encode(buf.getvalue()).decode()
+    except Exception:
+        frappe.log_error(frappe.get_traceback(), "vp qr_data_uri")
+        return None
+
+
 def _like(keyword):
     """Build a safe LIKE value; escape SQL wildcards inside the user's keyword."""
     kw = (keyword or "").strip()

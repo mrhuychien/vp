@@ -7,7 +7,7 @@ public token -> externally accessible link at /vb/<token>).
 import frappe
 from frappe import _
 
-from vp.api.common import _require, _require_login, _paginate, _like
+from vp.api.common import _require, _require_login, _paginate, _like, qr_data_uri
 
 VANBAN_FIELDS = [
     "name",
@@ -20,6 +20,8 @@ VANBAN_FIELDS = [
     "tep_dinh_kem",
     "lien_ket_ngoai",
     "public_token",
+    "so_lan_truy_cap",
+    "gioi_han_truy_cap",
     "ngay_cap_so",
     "danh_muc",
     "phong_ban",
@@ -105,7 +107,12 @@ def get_detail(name):
     doc.check_permission("read")
     data = doc.as_dict()
     out = {k: data.get(k) for k in VANBAN_FIELDS}
-    out["public_url"] = _public_url(data.get("public_token"))
+    url = _public_url(data.get("public_token")) if data.get("trang_thai") == "Da Ban Hanh" else None
+    out["public_url"] = url
+    out["public_qr"] = qr_data_uri(url) if url else None
+    limit = data.get("gioi_han_truy_cap") or 0
+    used = data.get("so_lan_truy_cap") or 0
+    out["con_lai"] = max(0, limit - used) if limit else None
     return {"van_ban": out}
 
 
@@ -154,10 +161,24 @@ def ban_hanh(name, lien_ket_ngoai=None):
         frappe.throw(_("Cần tải tệp scan đã đóng dấu hoặc dán liên kết ngoài trước khi ban hành."))
     if not doc.ngay_ban_hanh:
         doc.ngay_ban_hanh = frappe.utils.nowdate()
-    doc.ensure_public_token()
+    doc.reset_access()  # ensure token + counter 0 + default limit
     doc.trang_thai = "Da Ban Hanh"
     doc.save()
-    return {"ok": True, "name": doc.name, "public_token": doc.public_token, "public_url": _public_url(doc.public_token)}
+    url = _public_url(doc.public_token)
+    return {"ok": True, "name": doc.name, "public_url": url, "public_qr": qr_data_uri(url)}
+
+
+@frappe.whitelist()
+def cap_lai_link(name):
+    """Re-issue the public link: fresh token (old link/QR die) + reset counter."""
+    _require("VP Bien Tap")
+    doc = frappe.get_doc("VP Van Ban", name)
+    if doc.trang_thai != "Da Ban Hanh":
+        frappe.throw(_("Chỉ cấp lại link cho văn bản đã ban hành."))
+    doc.reset_access(new_token=True)
+    doc.save()
+    url = _public_url(doc.public_token)
+    return {"ok": True, "public_url": url, "public_qr": qr_data_uri(url), "con_lai": doc.gioi_han_truy_cap}
 
 
 @frappe.whitelist()

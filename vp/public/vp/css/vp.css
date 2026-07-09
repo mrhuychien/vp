@@ -227,9 +227,11 @@
   border-radius: var(--vp-radius-md); background: var(--vp-surface); font-size: .95rem; font-family: inherit; }
 .vp-search:focus { outline: none; border-color: var(--vp-oxblood-l); box-shadow: 0 0 0 3px var(--vp-accent-glow); }
 
-/* Copy-link row (public issuance link) */
+/* Copy-link row + QR (public issuance link) */
 .vp-copy-row { display: flex; gap: .5rem; align-items: center; }
 .vp-copy-row .vp-input { font-size: .82rem; }
+.vp-qr-row { display: flex; gap: 1rem; align-items: center; }
+.vp-qr { border: 1px solid var(--vp-border); border-radius: 12px; padding: 6px; background: #fff; flex-shrink: 0; }
 
 /* Filter bar */
 .vp-filters { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; margin-bottom: .75rem; }

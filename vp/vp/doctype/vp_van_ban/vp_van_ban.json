@@ -15,6 +15,8 @@
   "tep_dinh_kem",
   "lien_ket_ngoai",
   "public_token",
+  "so_lan_truy_cap",
+  "gioi_han_truy_cap",
   "ngay_cap_so",
   "danh_muc",
   "phong_ban",
@@ -88,6 +90,22 @@
    "hidden": 1,
    "no_copy": 1,
    "print_hide": 1
+  },
+  {
+   "fieldname": "so_lan_truy_cap",
+   "fieldtype": "Int",
+   "label": "L\u01b0\u1ee3t \u0111\u00e3 xem/t\u1ea3i",
+   "read_only": 1,
+   "default": "0",
+   "no_copy": 1,
+   "description": "S\u1ed1 l\u1ea7n link c\u00f4ng khai \u0111\u00e3 \u0111\u01b0\u1ee3c xem/t\u1ea3i."
+  },
+  {
+   "fieldname": "gioi_han_truy_cap",
+   "fieldtype": "Int",
+   "label": "Gi\u1edbi h\u1ea1n l\u01b0\u1ee3t",
+   "default": "5",
+   "description": "S\u1ed1 l\u1ea7n xem/t\u1ea3i t\u1ed1i \u0111a c\u1ee7a link c\u00f4ng khai. H\u1ebft l\u01b0\u1ee3t th\u00ec c\u1ea5p l\u1ea1i link."
   },
   {
    "fieldname": "ngay_cap_so",

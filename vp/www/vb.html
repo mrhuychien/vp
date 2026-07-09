@@ -26,6 +26,12 @@ main, .main-section, #page-content, .page-content { padding: 0 !important; margi
 .vbp-btn { display: flex; align-items: center; justify-content: center; gap: .5rem;
   margin-top: 1.3rem; background: linear-gradient(135deg,#7a1f1f,#9c3030); color: #fff !important;
   text-decoration: none; padding: .95rem 1rem; border-radius: 12px; font-weight: 800; font-size: 1rem; }
+.vbp-qr { text-align: center; margin-top: 1.2rem; }
+.vbp-qr img { border: 1px solid #e6dbcd; border-radius: 12px; padding: 8px; background: #fff; }
+.vbp-count { text-align: center; color: #6a5d52; font-size: .82rem; margin-top: .6rem; }
+.vbp-count b { color: #7a1f1f; }
+.vbp-blocked { text-align: center; margin-top: 1.2rem; padding: .9rem 1rem; border-radius: 12px;
+  background: #f8dcd9; color: #8a1c16; font-weight: 700; font-size: .9rem; }
 .vbp-note { text-align: center; color: #9a8d80; font-size: .78rem; margin-top: 1rem; }
 .vbp-empty { text-align: center; padding: 3rem 1rem; color: #9a8d80; }
 .vbp-empty .ic { font-size: 3rem; }
@@ -51,10 +57,18 @@ main, .main-section, #page-content, .page-content { padding: 0 !important; margi
         {% if doc.nguoi_nhan %}<dt>Nơi nhận</dt><dd>{{ doc.nguoi_nhan }}</dd>{% endif %}
         {% if doc.mo_ta %}<dt>Trích yếu</dt><dd>{{ doc.mo_ta }}</dd>{% endif %}
       </dl>
-      {% if doc.file_url %}
-      <a class="vbp-btn" href="{{ doc.file_url }}" target="_blank" rel="noopener">⬇️ Xem / Tải văn bản</a>
-      {% else %}
+
+      {% if doc.qr %}
+      <div class="vbp-qr"><img src="{{ doc.qr }}" alt="QR" width="150" height="150"></div>
+      {% endif %}
+
+      {% if not doc.has_file %}
       <div class="vbp-note">Chưa có tệp đính kèm.</div>
+      {% elif doc.het_luot %}
+      <div class="vbp-blocked">Đã hết lượt xem/tải ({{ doc.limit }}/{{ doc.limit }}).<br>Vui lòng liên hệ văn phòng để được cấp lại liên kết.</div>
+      {% else %}
+      <a class="vbp-btn" href="{{ doc.tai_url }}" rel="noopener">⬇️ Xem / Tải văn bản</a>
+      <div class="vbp-count">Còn <b>{{ doc.con_lai }}</b>/{{ doc.limit }} lượt xem/tải</div>
       {% endif %}
     </div>
   </div>

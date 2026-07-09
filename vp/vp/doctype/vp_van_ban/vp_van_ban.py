@@ -55,10 +55,23 @@ class VPVanBan(Document):
                 max_seq = max(max_seq, int(head))
         return "{0:02d}{1}".format(max_seq + 1, suffix)
 
+    DEFAULT_ACCESS_LIMIT = 5
+
     def ensure_public_token(self):
         if not self.public_token:
             self.public_token = frappe.generate_hash(length=24)
         return self.public_token
+
+    def reset_access(self, new_token=False):
+        """Reset the view/download counter (and optionally mint a fresh token so
+        old links/QRs stop working). Used on ban hành and on 'cấp lại link'."""
+        if new_token:
+            self.public_token = frappe.generate_hash(length=24)
+        else:
+            self.ensure_public_token()
+        self.so_lan_truy_cap = 0
+        if not self.gioi_han_truy_cap:
+            self.gioi_han_truy_cap = self.DEFAULT_ACCESS_LIMIT
 
     def public_url(self):
         if not self.public_token:
