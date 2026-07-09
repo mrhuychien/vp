@@ -144,6 +144,8 @@ function openCreateModal(boot) {
     title: 'Ban hành văn bản',
     body: html`
       <form id="vp-create">
+        <div class="vp-req-note">Các trường có dấu <span class="vp-req">*</span> là bắt buộc. Phần còn lại có thể để trống.</div>
+
         <div class="vp-field"><label>Tên văn bản <span class="vp-req">*</span></label>
           <input class="vp-input" name="ten_van_ban" required /></div>
         <div class="vp-field"><label>Loại văn bản <span class="vp-req">*</span></label>
@@ -155,27 +157,31 @@ function openCreateModal(boot) {
             <option value="">— Chọn danh mục —</option>
             ${raw(categoryOptions(boot.danh_muc, ''))}
           </select></div>
-        <div class="vp-field"><label>Phòng ban chủ quản</label>
-          <select class="vp-select" name="phong_ban">
-            ${raw(options(boot.phong_ban, 'name', 'department_name', '', '— Không chọn —'))}
-          </select></div>
-        <div class="vp-field"><label>Mã hiệu (bỏ trống để tự sinh)</label>
-          <input class="vp-input" name="ma_hieu" placeholder="VD: QD-2026-001" /></div>
-        <div class="vp-field"><label>Số phiên bản đầu</label>
-          <input class="vp-input" name="so_phien_ban" value="1.0" /></div>
-        <div class="vp-field"><label>Ngày ban hành</label>
-          <input class="vp-input" type="date" name="ngay_ban_hanh" /></div>
-        <div class="vp-field"><label>Người soạn</label><input class="vp-input" name="nguoi_soan" /></div>
-        <div class="vp-field"><label>Người duyệt</label><input class="vp-input" name="nguoi_duyet" /></div>
-        <div class="vp-field"><label>Từ khóa (tra cứu)</label><input class="vp-input" name="tu_khoa" /></div>
-        <div class="vp-field"><label>Mô tả</label><textarea class="vp-textarea" name="mo_ta"></textarea></div>
         <div class="vp-field"><label>Tệp chính (PDF đã ký) <span class="vp-req">*</span></label>
           <input class="vp-input" type="file" name="tep_chinh" accept="application/pdf" required /></div>
-        <div class="vp-field"><label>Tệp gốc (Word/nguồn)</label>
-          <input class="vp-input" type="file" name="tep_goc" /></div>
-        <label class="vp-flex vp-items-center vp-gap-2" style="font-weight:600">
-          <input type="checkbox" name="set_hien_hanh" /> Đặt hiện hành ngay
-        </label>
+
+        <label class="vp-check-row"><input type="checkbox" name="set_hien_hanh" checked /> Ban hành & đặt hiện hành ngay</label>
+
+        <details class="vp-optional">
+          <summary>Thông tin bổ sung (tự chọn)</summary>
+          <div class="vp-field"><label>Số văn bản</label>
+            <input class="vp-input" name="ma_hieu" placeholder="Bỏ trống để tự cấp — VD: 01/2026-CV-HGC" /></div>
+          <div class="vp-field"><label>Ngày ban hành</label>
+            <input class="vp-input" type="date" name="ngay_ban_hanh" />
+            <span class="vp-hint">Để trống sẽ tự lấy ngày hôm nay khi ban hành.</span></div>
+          <div class="vp-field"><label>Số phiên bản đầu</label>
+            <input class="vp-input" name="so_phien_ban" value="1.0" /></div>
+          <div class="vp-field"><label>Phòng ban chủ quản</label>
+            <select class="vp-select" name="phong_ban">
+              ${raw(options(boot.phong_ban, 'name', 'department_name', '', '— Không chọn —'))}
+            </select></div>
+          <div class="vp-field"><label>Người soạn</label><input class="vp-input" name="nguoi_soan" /></div>
+          <div class="vp-field"><label>Người duyệt</label><input class="vp-input" name="nguoi_duyet" /></div>
+          <div class="vp-field"><label>Từ khóa (tra cứu)</label><input class="vp-input" name="tu_khoa" /></div>
+          <div class="vp-field"><label>Mô tả</label><textarea class="vp-textarea" name="mo_ta"></textarea></div>
+          <div class="vp-field"><label>Tệp gốc (Word/nguồn)</label>
+            <input class="vp-input" type="file" name="tep_goc" /></div>
+        </details>
       </form>`,
     footer: `
       <button class="vp-btn-ghost" data-vp-cancel>Hủy</button>

@@ -21,12 +21,12 @@
   {
    "fieldname": "ma_hieu",
    "fieldtype": "Data",
-   "label": "M\u00e3 hi\u1ec7u",
+   "label": "S\u1ed1 v\u0103n b\u1ea3n",
    "unique": 1,
    "in_list_view": 1,
    "in_standard_filter": 1,
    "no_copy": 1,
-   "description": "B\u1ecf tr\u1ed1ng \u0111\u1ec3 t\u1ef1 sinh {loai}-{n\u0103m}-{seq}. Nh\u1eadp tay cho v\u0103n b\u1ea3n c\u0169."
+   "description": "B\u1ecf tr\u1ed1ng \u0111\u1ec3 t\u1ef1 c\u1ea5p khi ban h\u00e0nh theo d\u1ea1ng {s\u1ed1}/{n\u0103m}-{lo\u1ea1i}-HGC (VD 01/2026-CV-HGC). C\u00f3 th\u1ec3 nh\u1eadp/ch\u1ec9nh tay."
   },
   {
    "fieldname": "ten_van_ban",

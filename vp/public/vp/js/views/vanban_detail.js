@@ -128,18 +128,26 @@ function openAddVersion(vanBan, onDone) {
     title: 'Thêm phiên bản mới',
     body: html`
       <form id="vp-ver-form">
+        <div class="vp-req-note">Các trường có dấu <span class="vp-req">*</span> là bắt buộc. Phần còn lại có thể để trống.</div>
+
         <div class="vp-field"><label>Số phiên bản <span class="vp-req">*</span></label>
           <input class="vp-input" name="so_phien_ban" placeholder="VD: 2.0" required /></div>
-        <div class="vp-field"><label>Ngày ban hành</label><input class="vp-input" type="date" name="ngay_ban_hanh" /></div>
-        <div class="vp-field"><label>Ngày hết hiệu lực</label><input class="vp-input" type="date" name="ngay_het_hieu_luc" /></div>
-        <div class="vp-field"><label>Lý do sửa đổi</label><textarea class="vp-textarea" name="ly_do_sua_doi"></textarea></div>
-        <div class="vp-field"><label>Người soạn</label><input class="vp-input" name="nguoi_soan" /></div>
-        <div class="vp-field"><label>Người duyệt</label><input class="vp-input" name="nguoi_duyet" /></div>
         <div class="vp-field"><label>Tệp chính (PDF) <span class="vp-req">*</span></label>
           <input class="vp-input" type="file" name="tep_chinh" accept="application/pdf" required /></div>
-        <div class="vp-field"><label>Tệp gốc</label><input class="vp-input" type="file" name="tep_goc" /></div>
-        <label class="vp-flex vp-items-center vp-gap-2" style="font-weight:600">
-          <input type="checkbox" name="set_hien_hanh" /> Đặt hiện hành ngay</label>
+
+        <label class="vp-check-row"><input type="checkbox" name="set_hien_hanh" checked /> Ban hành & đặt hiện hành ngay</label>
+
+        <details class="vp-optional">
+          <summary>Thông tin bổ sung (tự chọn)</summary>
+          <div class="vp-field"><label>Ngày ban hành</label>
+            <input class="vp-input" type="date" name="ngay_ban_hanh" />
+            <span class="vp-hint">Để trống sẽ tự lấy ngày hôm nay khi ban hành.</span></div>
+          <div class="vp-field"><label>Ngày hết hiệu lực</label><input class="vp-input" type="date" name="ngay_het_hieu_luc" /></div>
+          <div class="vp-field"><label>Lý do sửa đổi</label><textarea class="vp-textarea" name="ly_do_sua_doi"></textarea></div>
+          <div class="vp-field"><label>Người soạn</label><input class="vp-input" name="nguoi_soan" /></div>
+          <div class="vp-field"><label>Người duyệt</label><input class="vp-input" name="nguoi_duyet" /></div>
+          <div class="vp-field"><label>Tệp gốc</label><input class="vp-input" type="file" name="tep_goc" /></div>
+        </details>
       </form>`,
     footer: `<button class="vp-btn-ghost" data-vp-cancel>Hủy</button><button class="vp-btn-primary" id="vp-ver-ok">Thêm</button>`,
     onMount(root) {
