@@ -3,8 +3,9 @@
 App Frappe/ERPNext **v16** cho Công ty Rồng Vàng Hoàng Gia (nhà máy bánh đậu xanh,
 ISO 22000:2018). Là **kho tra cứu + kiểm soát phiên bản** cho 3 nhóm tài sản văn bản:
 
-1. **Văn bản ban hành toàn công ty** — QĐ/TB/quy chế/quy trình/SOP/biểu mẫu/TCCS,
-   mã hiệu thống nhất, chỉ 1 phiên bản hiện hành, truy vết lịch sử (ISO 22000 §7.5).
+1. **Sổ văn bản** — cấp số tự động ({số}/{năm}-{loại}-HGC) → tải scan đã đóng dấu
+   hoặc dán liên kết ngoài → ban hành thành **link công khai** `/vb/<token>` gửi
+   cho nơi nhận. Mỗi văn bản 1 record (không phiên bản).
 2. **Hồ sơ nguyên vật liệu** theo Item + Supplier — tự công bố, CoA, kiểm nghiệm,
    hợp đồng, cảnh báo trước 30 ngày hết hạn.
 3. **Artwork bao bì/nhãn** theo SKU — phiên bản đang in, file gốc AI/PDF, lịch sử.
@@ -27,7 +28,8 @@ Mở portal tra cứu tại `/vp`.
 
 ## Cấu trúc
 
-- `vp/vp/doctype/` — 7 DocType + controller
+- `vp/vp/doctype/` — 6 DocType + controller
+- `vp/www/vb.{py,html}` — trang công khai `/vb/<token>` (không cần đăng nhập)
 - `vp/api/` — whitelisted methods (common, vanban, nvl, artwork, dashboard)
 - `vp/www/vp.{html,py}` + `vp/public/vp/` — SPA `/vp` (vanilla ES modules)
 - `vp/fixtures/` — 5 role + seed Loại văn bản / Danh mục

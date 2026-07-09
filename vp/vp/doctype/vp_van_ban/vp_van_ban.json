@@ -9,11 +9,15 @@
   "ma_hieu",
   "ten_van_ban",
   "loai_van_ban",
+  "ngay_ban_hanh",
+  "nguoi_nhan",
+  "trang_thai",
+  "tep_dinh_kem",
+  "lien_ket_ngoai",
+  "public_token",
+  "ngay_cap_so",
   "danh_muc",
   "phong_ban",
-  "trang_thai",
-  "phien_ban_hien_hanh",
-  "ngay_ban_hanh_dau",
   "tu_khoa",
   "mo_ta"
  ],
@@ -26,12 +30,12 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "no_copy": 1,
-   "description": "B\u1ecf tr\u1ed1ng \u0111\u1ec3 t\u1ef1 c\u1ea5p khi ban h\u00e0nh theo d\u1ea1ng {s\u1ed1}/{n\u0103m}-{lo\u1ea1i}-HGC (VD 01/2026-CV-HGC). C\u00f3 th\u1ec3 nh\u1eadp/ch\u1ec9nh tay."
+   "description": "T\u1ef1 c\u1ea5p khi l\u1eadp ({s\u1ed1}/{n\u0103m}-{lo\u1ea1i}-HGC, VD 01/2026-CV-HGC). C\u00f3 th\u1ec3 nh\u1eadp/ch\u1ec9nh tay."
   },
   {
    "fieldname": "ten_van_ban",
    "fieldtype": "Data",
-   "label": "T\u00ean v\u0103n b\u1ea3n",
+   "label": "T\u00ean n\u1ed9i dung",
    "reqd": 1,
    "in_list_view": 1
   },
@@ -45,11 +49,58 @@
    "in_standard_filter": 1
   },
   {
+   "fieldname": "ngay_ban_hanh",
+   "fieldtype": "Date",
+   "label": "Ng\u00e0y",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "nguoi_nhan",
+   "fieldtype": "Small Text",
+   "label": "Ng\u01b0\u1eddi nh\u1eadn / C\u01a1 quan nh\u1eadn"
+  },
+  {
+   "fieldname": "trang_thai",
+   "fieldtype": "Select",
+   "label": "Tr\u1ea1ng th\u00e1i",
+   "options": "Da Cap So\nDa Ban Hanh\nHuy",
+   "default": "Da Cap So",
+   "read_only": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "tep_dinh_kem",
+   "fieldtype": "Attach",
+   "label": "T\u1ec7p v\u0103n b\u1ea3n (scan \u0111\u00e3 \u0111\u00f3ng d\u1ea5u)"
+  },
+  {
+   "fieldname": "lien_ket_ngoai",
+   "fieldtype": "Data",
+   "label": "Li\u00ean k\u1ebft ngo\u00e0i (n\u1ebfu kh\u00f4ng upload)",
+   "description": "D\u00e1n link file b\u00ean ngo\u00e0i (Drive, v.v.) n\u1ebfu kh\u00f4ng t\u1ea3i t\u1ec7p tr\u1ef1c ti\u1ebfp."
+  },
+  {
+   "fieldname": "public_token",
+   "fieldtype": "Data",
+   "label": "Token c\u00f4ng khai",
+   "read_only": 1,
+   "hidden": 1,
+   "no_copy": 1,
+   "print_hide": 1
+  },
+  {
+   "fieldname": "ngay_cap_so",
+   "fieldtype": "Date",
+   "label": "Ng\u00e0y c\u1ea5p s\u1ed1",
+   "read_only": 1,
+   "no_copy": 1
+  },
+  {
    "fieldname": "danh_muc",
    "fieldtype": "Link",
    "label": "Danh m\u1ee5c",
    "options": "VP Danh Muc",
-   "reqd": 1,
    "in_standard_filter": 1
   },
   {
@@ -60,31 +111,6 @@
    "in_standard_filter": 1
   },
   {
-   "fieldname": "trang_thai",
-   "fieldtype": "Select",
-   "label": "Tr\u1ea1ng th\u00e1i",
-   "options": "Du Thao\nHien Hanh\nHet Hieu Luc",
-   "default": "Du Thao",
-   "read_only": 1,
-   "in_list_view": 1,
-   "in_standard_filter": 1
-  },
-  {
-   "fieldname": "phien_ban_hien_hanh",
-   "fieldtype": "Link",
-   "label": "Phi\u00ean b\u1ea3n hi\u1ec7n h\u00e0nh",
-   "options": "VP Phien Ban Van Ban",
-   "read_only": 1,
-   "no_copy": 1
-  },
-  {
-   "fieldname": "ngay_ban_hanh_dau",
-   "fieldtype": "Date",
-   "label": "Ng\u00e0y ban h\u00e0nh \u0111\u1ea7u ti\u00ean",
-   "read_only": 1,
-   "no_copy": 1
-  },
-  {
    "fieldname": "tu_khoa",
    "fieldtype": "Small Text",
    "label": "T\u1eeb kh\u00f3a",
@@ -93,7 +119,7 @@
   {
    "fieldname": "mo_ta",
    "fieldtype": "Small Text",
-   "label": "M\u00f4 t\u1ea3"
+   "label": "M\u00f4 t\u1ea3 / Tr\u00edch y\u1ebfu"
   }
  ],
  "index_web_pages_for_search": 1,

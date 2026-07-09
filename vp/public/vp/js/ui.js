@@ -29,9 +29,9 @@ export function html(strings, ...vals) {
 
 // ── Status badge mapping (brief §5.3) ──────────────────────────────────────
 const STATUS = {
-  'Hien Hanh':    ['vp-badge-success', 'Hiện hành'],
-  'Du Thao':      ['vp-badge-muted', 'Dự thảo'],
-  'Het Hieu Luc': ['vp-badge-danger vp-badge-strike', 'Hết hiệu lực'],
+  'Da Cap So':    ['vp-badge-warning', 'Đã cấp số'],
+  'Da Ban Hanh':  ['vp-badge-success', 'Đã ban hành'],
+  'Huy':          ['vp-badge-danger vp-badge-strike', 'Hủy'],
   'Con Hieu Luc': ['vp-badge-success', 'Còn hiệu lực'],
   'Sap Het Han':  ['vp-badge-warning', 'Sắp hết hạn'],
   'Het Han':      ['vp-badge-danger', 'Hết hạn'],

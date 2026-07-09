@@ -1,7 +1,7 @@
 import { call, uploadFile, fileUrl } from '../api.js';
 import {
   html, raw, escapeHtml, badge, formatDate, statusLabel, skeleton, emptyState,
-  toast, showModal, closeModal, confirmDialog, showLoading, hideLoading,
+  toast, showModal, closeModal, showLoading, hideLoading,
 } from '../ui.js';
 
 export async function render({ container, params, boot, setTitle }) {
@@ -19,39 +19,29 @@ export async function render({ container, params, boot, setTitle }) {
       container.innerHTML = `<div class="vp-view-pad">${emptyState({ icon: '⚠️', title: 'Không tải được văn bản', hint: e.message })}</div>`;
       return;
     }
-    paint(data);
+    paint(data.van_ban);
   }
 
-  function paint(data) {
-    const vb = data.van_ban;
-    const current = data.versions.find((v) => v.name === vb.phien_ban_hien_hanh);
-    const dl = current && current.tep_chinh;
+  function paint(vb) {
+    const issued = vb.trang_thai === 'Da Ban Hanh';
+    const fileHref = vb.tep_dinh_kem || vb.lien_ket_ngoai;
 
-    const versionsHtml = data.versions.length ? data.versions.map((v) => {
-      const isCur = v.name === vb.phien_ban_hien_hanh;
-      const acts = [];
-      if (canEdit && !isCur && v.trang_thai !== 'Hien Hanh') {
-        acts.push(`<button class="vp-btn-brass vp-btn-sm" data-set="${escapeHtml(v.name)}">Đặt hiện hành</button>`);
-      }
-      const files = [];
-      if (v.tep_chinh) files.push(`<a class="vp-file-link" href="${escapeHtml(fileUrl(v.tep_chinh))}" target="_blank" rel="noopener">📄 Tệp chính</a>`);
-      if (v.tep_goc) files.push(`<a class="vp-file-link" href="${escapeHtml(fileUrl(v.tep_goc))}" target="_blank" rel="noopener">📎 Tệp gốc</a>`);
-      return html`
-        <div class="vp-tl-item ${raw(isCur ? 'vp-current' : '')}">
-          <div class="vp-tl-head">
-            <span class="vp-tl-ver">v${v.so_phien_ban}</span>
-            ${badge(v.trang_thai)}
-          </div>
-          <dl class="vp-tl-meta">
-            <dt>Ban hành</dt><dd>${formatDate(v.ngay_ban_hanh)}</dd>
-            ${v.ngay_het_hieu_luc ? raw(`<dt>Hết hiệu lực</dt><dd>${escapeHtml(formatDate(v.ngay_het_hieu_luc))}</dd>`) : ''}
-            ${v.ly_do_sua_doi ? raw(`<dt>Lý do sửa đổi</dt><dd>${escapeHtml(v.ly_do_sua_doi)}</dd>`) : ''}
-            ${v.nguoi_soan ? raw(`<dt>Người soạn</dt><dd>${escapeHtml(v.nguoi_soan)}</dd>`) : ''}
-            ${v.nguoi_duyet ? raw(`<dt>Người duyệt</dt><dd>${escapeHtml(v.nguoi_duyet)}</dd>`) : ''}
-          </dl>
-          <div class="vp-tl-actions">${raw(files.join(''))}${raw(acts.join(''))}</div>
-        </div>`;
-    }) : raw(emptyState({ title: 'Chưa có phiên bản' }));
+    const publicBlock = issued && vb.public_url ? html`
+      <div class="vp-card vp-mb-3">
+        <div class="vp-kpi-label vp-mb-2">Link công khai (gửi nơi nhận)</div>
+        <div class="vp-copy-row">
+          <input class="vp-input" id="vp-pub" readonly value="${vb.public_url}" />
+          <button class="vp-btn-brass vp-btn-sm" id="vp-copy">Sao chép</button>
+        </div>
+        ${fileHref ? raw(`<a class="vp-download-cta" href="${escapeHtml(fileUrl(fileHref))}" target="_blank" rel="noopener">⬇️ Xem / Tải văn bản</a>`) : ''}
+      </div>` : '';
+
+    const capSoBlock = !issued && vb.trang_thai !== 'Huy' ? html`
+      <div class="vp-card vp-alert-card vp-mb-3">
+        <div class="vp-font-bold vp-mb-2">Đã cấp số — chưa ban hành</div>
+        <div class="vp-text-sm vp-text-muted vp-mb-3">Tải bản scan đã đóng dấu, hoặc dán liên kết ngoài, rồi ban hành để tạo link truy cập từ bên ngoài.</div>
+        ${canEdit ? raw('<button class="vp-btn-primary vp-btn-block" id="vp-banhanh">Ban hành</button>') : ''}
+      </div>` : '';
 
     container.innerHTML = html`<div class="vp-view-pad">
       <div class="vp-view-banner">
@@ -62,118 +52,144 @@ export async function render({ container, params, boot, setTitle }) {
         <div class="vp-view-banner-badge">${statusLabel(vb.trang_thai)}</div>
       </div>
 
-      ${dl ? raw(`<a class="vp-download-cta" href="${escapeHtml(fileUrl(dl))}" target="_blank" rel="noopener">⬇️ Tải bản hiện hành (v${escapeHtml(current.so_phien_ban)})</a>`) : ''}
+      ${publicBlock}
+      ${capSoBlock}
 
       <div class="vp-card vp-mb-3">
         <dl class="vp-detail-list">
           <dt>Loại</dt><dd>${vb.loai_van_ban}</dd>
-          <dt>Danh mục</dt><dd>${vb.danh_muc}</dd>
+          <dt>Ngày</dt><dd>${formatDate(vb.ngay_ban_hanh)}</dd>
+          ${vb.nguoi_nhan ? raw(`<dt>Nơi nhận</dt><dd>${escapeHtml(vb.nguoi_nhan)}</dd>`) : ''}
+          ${vb.danh_muc ? raw(`<dt>Danh mục</dt><dd>${escapeHtml(vb.danh_muc)}</dd>`) : ''}
           ${vb.phong_ban ? raw(`<dt>Phòng ban</dt><dd>${escapeHtml(vb.phong_ban)}</dd>`) : ''}
-          ${vb.ngay_ban_hanh_dau ? raw(`<dt>Ban hành đầu</dt><dd>${escapeHtml(formatDate(vb.ngay_ban_hanh_dau))}</dd>`) : ''}
+          ${vb.ngay_cap_so ? raw(`<dt>Ngày cấp số</dt><dd>${escapeHtml(formatDate(vb.ngay_cap_so))}</dd>`) : ''}
           ${vb.tu_khoa ? raw(`<dt>Từ khóa</dt><dd>${escapeHtml(vb.tu_khoa)}</dd>`) : ''}
-          ${vb.mo_ta ? raw(`<dt>Mô tả</dt><dd>${escapeHtml(vb.mo_ta)}</dd>`) : ''}
+          ${vb.mo_ta ? raw(`<dt>Trích yếu</dt><dd style="white-space:pre-line">${escapeHtml(vb.mo_ta)}</dd>`) : ''}
         </dl>
       </div>
 
-      <div class="vp-flex vp-items-center vp-justify-between vp-mb-2">
-        <div class="vp-section-title" style="margin:0">Phiên bản</div>
-        <div class="vp-btn-row">
-          ${canEdit ? raw('<button class="vp-btn-primary vp-btn-sm" id="vp-add-ver">+ Phiên bản</button>') : ''}
-          ${isAdmin && vb.trang_thai !== 'Het Hieu Luc' ? raw('<button class="vp-btn-danger vp-btn-sm" id="vp-thuhoi">Thu hồi</button>') : ''}
-        </div>
+      <div class="vp-btn-row">
+        ${canEdit ? raw('<button class="vp-btn-ghost vp-btn-sm" id="vp-edit">Sửa thông tin</button>') : ''}
+        ${isAdmin && vb.trang_thai !== 'Huy' ? raw('<button class="vp-btn-danger vp-btn-sm" id="vp-huy">Hủy</button>') : ''}
       </div>
-      <div class="vp-timeline">${versionsHtml}</div>
     </div>`;
 
-    // bindings
-    container.querySelectorAll('[data-set]').forEach((b) => b.addEventListener('click', async () => {
-      showLoading('Đang cập nhật…');
-      try {
-        await call('vp.api.vanban.set_hien_hanh', { phien_ban: b.dataset.set });
-        hideLoading(); toast('Đã đặt hiện hành', 'success'); load();
-      } catch (e) { hideLoading(); toast(e.message, 'error'); }
-    }));
-    const addVer = container.querySelector('#vp-add-ver');
-    if (addVer) addVer.addEventListener('click', () => openAddVersion(vb.name, load));
-    const thuhoi = container.querySelector('#vp-thuhoi');
-    if (thuhoi) thuhoi.addEventListener('click', () => openThuHoi(vb.name));
-  }
-
-  function openThuHoi(vanBan) {
-    showModal({
-      title: 'Thu hồi văn bản',
-      body: html`
-        <p class="vp-confirm-msg">Toàn bộ phiên bản sẽ chuyển <strong>Hết hiệu lực</strong>. Thao tác này không tự hoàn tác.</p>
-        <div class="vp-field"><label>Lý do thu hồi</label><textarea class="vp-textarea" id="vp-thuhoi-lydo"></textarea></div>`,
-      footer: `<button class="vp-btn-ghost" data-vp-cancel>Hủy</button><button class="vp-btn-danger" id="vp-thuhoi-ok">Thu hồi</button>`,
-      onMount(root) {
-        root.querySelector('[data-vp-cancel]').addEventListener('click', closeModal);
-        root.querySelector('#vp-thuhoi-ok').addEventListener('click', async () => {
-          const lyDo = root.querySelector('#vp-thuhoi-lydo').value.trim();
-          closeModal(); showLoading('Đang thu hồi…');
-          try {
-            await call('vp.api.vanban.thu_hoi', { van_ban: vanBan, ly_do: lyDo });
-            hideLoading(); toast('Đã thu hồi văn bản', 'success'); load();
-          } catch (e) { hideLoading(); toast(e.message, 'error'); }
-        });
-      },
+    const copyBtn = container.querySelector('#vp-copy');
+    if (copyBtn) copyBtn.addEventListener('click', () => {
+      const inp = container.querySelector('#vp-pub');
+      inp.select();
+      const done = () => toast('Đã sao chép link', 'success');
+      if (navigator.clipboard) navigator.clipboard.writeText(inp.value).then(done, () => { document.execCommand('copy'); done(); });
+      else { document.execCommand('copy'); done(); }
     });
+    const bh = container.querySelector('#vp-banhanh');
+    if (bh) bh.addEventListener('click', () => openBanHanh(vb, load));
+    const ed = container.querySelector('#vp-edit');
+    if (ed) ed.addEventListener('click', () => openEdit(vb, boot, load));
+    const huy = container.querySelector('#vp-huy');
+    if (huy) huy.addEventListener('click', () => openHuy(vb.name, load));
   }
 
   await load();
 }
 
-function openAddVersion(vanBan, onDone) {
+// ── Ban hành (B2): upload scan OR paste link ─────────────────────────────────
+function openBanHanh(vb, onDone) {
   showModal({
-    title: 'Thêm phiên bản mới',
+    title: 'Ban hành ' + vb.ma_hieu,
     body: html`
-      <form id="vp-ver-form">
-        <div class="vp-req-note">Các trường có dấu <span class="vp-req">*</span> là bắt buộc. Phần còn lại có thể để trống.</div>
-
-        <div class="vp-field"><label>Số phiên bản <span class="vp-req">*</span></label>
-          <input class="vp-input" name="so_phien_ban" placeholder="VD: 2.0" required /></div>
-        <div class="vp-field"><label>Tệp chính (PDF) <span class="vp-req">*</span></label>
-          <input class="vp-input" type="file" name="tep_chinh" accept="application/pdf" required /></div>
-
-        <label class="vp-check-row"><input type="checkbox" name="set_hien_hanh" checked /> Ban hành & đặt hiện hành ngay</label>
-
-        <details class="vp-optional">
-          <summary>Thông tin bổ sung (tự chọn)</summary>
-          <div class="vp-field"><label>Ngày ban hành</label>
-            <input class="vp-input" type="date" name="ngay_ban_hanh" />
-            <span class="vp-hint">Để trống sẽ tự lấy ngày hôm nay khi ban hành.</span></div>
-          <div class="vp-field"><label>Ngày hết hiệu lực</label><input class="vp-input" type="date" name="ngay_het_hieu_luc" /></div>
-          <div class="vp-field"><label>Lý do sửa đổi</label><textarea class="vp-textarea" name="ly_do_sua_doi"></textarea></div>
-          <div class="vp-field"><label>Người soạn</label><input class="vp-input" name="nguoi_soan" /></div>
-          <div class="vp-field"><label>Người duyệt</label><input class="vp-input" name="nguoi_duyet" /></div>
-          <div class="vp-field"><label>Tệp gốc</label><input class="vp-input" type="file" name="tep_goc" /></div>
-        </details>
+      <form id="vp-bh">
+        <div class="vp-req-note">Chọn <b>một</b> trong hai: tải tệp scan đã đóng dấu, hoặc dán liên kết ngoài. Ban hành sẽ tạo link truy cập từ bên ngoài.</div>
+        <div class="vp-field"><label>Tệp scan đã đóng dấu (PDF/ảnh)</label>
+          <input class="vp-input" type="file" name="tep" accept="application/pdf,image/*" /></div>
+        <div class="vp-field"><label>Hoặc dán liên kết ngoài</label>
+          <input class="vp-input" name="lien_ket_ngoai" placeholder="https://…" value="${escapeHtml(vb.lien_ket_ngoai || '')}" /></div>
       </form>`,
-    footer: `<button class="vp-btn-ghost" data-vp-cancel>Hủy</button><button class="vp-btn-primary" id="vp-ver-ok">Thêm</button>`,
+    footer: `<button class="vp-btn-ghost" data-vp-cancel>Hủy</button><button class="vp-btn-primary" id="vp-bh-ok">Ban hành</button>`,
     onMount(root) {
       root.querySelector('[data-vp-cancel]').addEventListener('click', closeModal);
-      root.querySelector('#vp-ver-ok').addEventListener('click', async () => {
-        const form = root.querySelector('#vp-ver-form');
+      root.querySelector('#vp-bh-ok').addEventListener('click', async () => {
+        const form = root.querySelector('#vp-bh');
+        const file = form.tep.files[0];
+        const link = form.lien_ket_ngoai.value.trim();
+        if (!file && !link) { toast('Cần tải tệp hoặc dán liên kết.', 'error'); return; }
+        showLoading('Đang ban hành…');
+        try {
+          if (file) {
+            // Public file so the /vb/<token> link works for external recipients.
+            await uploadFile({ file, doctype: 'VP Van Ban', docname: vb.name, fieldname: 'tep_dinh_kem', isPrivate: 0 });
+          }
+          await call('vp.api.vanban.ban_hanh', { name: vb.name, lien_ket_ngoai: link || null });
+          hideLoading(); closeModal(); toast('Đã ban hành ' + vb.ma_hieu, 'success'); onDone();
+        } catch (e) { hideLoading(); toast(e.message, 'error'); }
+      });
+    },
+  });
+}
+
+// ── Edit metadata ────────────────────────────────────────────────────────────
+function openEdit(vb, boot, onDone) {
+  const catOpts = boot.danh_muc.map((d) =>
+    `<option value="${escapeHtml(d.name)}"${d.name === vb.danh_muc ? ' selected' : ''}>${escapeHtml(d.ten_danh_muc)}</option>`).join('');
+  const loaiOpts = boot.loai_van_ban.map((l) =>
+    `<option value="${escapeHtml(l.name)}"${l.name === vb.loai_van_ban ? ' selected' : ''}>${escapeHtml(l.ten_loai)}</option>`).join('');
+  showModal({
+    title: 'Sửa thông tin',
+    body: html`
+      <form id="vp-ed">
+        <div class="vp-field"><label>Tên nội dung <span class="vp-req">*</span></label>
+          <input class="vp-input" name="ten_van_ban" required value="${escapeHtml(vb.ten_van_ban || '')}" /></div>
+        <div class="vp-field"><label>Loại văn bản</label><select class="vp-select" name="loai_van_ban">${raw(loaiOpts)}</select></div>
+        <div class="vp-field"><label>Số văn bản</label><input class="vp-input" name="ma_hieu" value="${escapeHtml(vb.ma_hieu || '')}" /></div>
+        <div class="vp-field"><label>Ngày</label><input class="vp-input" type="date" name="ngay_ban_hanh" value="${escapeHtml((vb.ngay_ban_hanh || '').slice(0, 10))}" /></div>
+        <div class="vp-field"><label>Người nhận / Cơ quan nhận</label><textarea class="vp-textarea" name="nguoi_nhan" rows="2">${escapeHtml(vb.nguoi_nhan || '')}</textarea></div>
+        <div class="vp-field"><label>Danh mục</label><select class="vp-select" name="danh_muc"><option value="">— Không chọn —</option>${raw(catOpts)}</select></div>
+        <div class="vp-field"><label>Từ khóa</label><input class="vp-input" name="tu_khoa" value="${escapeHtml(vb.tu_khoa || '')}" /></div>
+        <div class="vp-field"><label>Trích yếu</label><textarea class="vp-textarea" name="mo_ta">${escapeHtml(vb.mo_ta || '')}</textarea></div>
+      </form>`,
+    footer: `<button class="vp-btn-ghost" data-vp-cancel>Hủy</button><button class="vp-btn-primary" id="vp-ed-ok">Lưu</button>`,
+    onMount(root) {
+      root.querySelector('[data-vp-cancel]').addEventListener('click', closeModal);
+      root.querySelector('#vp-ed-ok').addEventListener('click', async () => {
+        const form = root.querySelector('#vp-ed');
         if (!form.reportValidity()) return;
         const fd = new FormData(form);
-        const tepChinh = form.tep_chinh.files[0];
-        if (!tepChinh) { toast('Vui lòng chọn tệp chính (PDF).', 'error'); return; }
-        const tepGoc = form.tep_goc.files[0];
-        showLoading('Đang thêm phiên bản…');
+        showLoading('Đang lưu…');
         try {
-          const res = await call('vp.api.vanban.add_phien_ban', {
-            van_ban: vanBan,
-            so_phien_ban: fd.get('so_phien_ban'),
+          await call('vp.api.vanban.update_van_ban', {
+            name: vb.name,
+            ten_van_ban: fd.get('ten_van_ban'),
+            loai_van_ban: fd.get('loai_van_ban'),
+            ma_hieu: fd.get('ma_hieu') || null,
             ngay_ban_hanh: fd.get('ngay_ban_hanh') || null,
-            ngay_het_hieu_luc: fd.get('ngay_het_hieu_luc') || null,
-            ly_do_sua_doi: fd.get('ly_do_sua_doi') || null,
-            nguoi_soan: fd.get('nguoi_soan') || null,
-            nguoi_duyet: fd.get('nguoi_duyet') || null,
-            set_hien_hanh: form.set_hien_hanh.checked ? 1 : 0,
+            nguoi_nhan: fd.get('nguoi_nhan') || null,
+            danh_muc: fd.get('danh_muc') || null,
+            tu_khoa: fd.get('tu_khoa') || null,
+            mo_ta: fd.get('mo_ta') || null,
           });
-          await uploadFile({ file: tepChinh, doctype: 'VP Phien Ban Van Ban', docname: res.phien_ban, fieldname: 'tep_chinh' });
-          if (tepGoc) await uploadFile({ file: tepGoc, doctype: 'VP Phien Ban Van Ban', docname: res.phien_ban, fieldname: 'tep_goc' });
-          hideLoading(); closeModal(); toast('Đã thêm phiên bản', 'success'); onDone();
+          hideLoading(); closeModal(); toast('Đã lưu', 'success'); onDone();
+        } catch (e) { hideLoading(); toast(e.message, 'error'); }
+      });
+    },
+  });
+}
+
+// ── Hủy ──────────────────────────────────────────────────────────────────────
+function openHuy(name, onDone) {
+  showModal({
+    title: 'Hủy văn bản',
+    body: html`
+      <p class="vp-confirm-msg">Văn bản sẽ chuyển trạng thái <strong>Hủy</strong> (vẫn lưu trong sổ). Link công khai sẽ ngừng truy cập.</p>
+      <div class="vp-field"><label>Lý do hủy</label><textarea class="vp-textarea" id="vp-huy-lydo"></textarea></div>`,
+    footer: `<button class="vp-btn-ghost" data-vp-cancel>Đóng</button><button class="vp-btn-danger" id="vp-huy-ok">Hủy văn bản</button>`,
+    onMount(root) {
+      root.querySelector('[data-vp-cancel]').addEventListener('click', closeModal);
+      root.querySelector('#vp-huy-ok').addEventListener('click', async () => {
+        const lyDo = root.querySelector('#vp-huy-lydo').value.trim();
+        closeModal(); showLoading('Đang hủy…');
+        try {
+          await call('vp.api.vanban.huy', { name, ly_do: lyDo });
+          hideLoading(); toast('Đã hủy văn bản', 'success'); onDone();
         } catch (e) { hideLoading(); toast(e.message, 'error'); }
       });
     },

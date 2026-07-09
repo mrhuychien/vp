@@ -12,6 +12,13 @@ app_license = "Proprietary"
 # the portal at /vp is a self-contained www page.
 
 # ---------------------------------------------------------------------------
+# Public access — issued documents are reachable at /vb/<token> without login.
+# ---------------------------------------------------------------------------
+website_route_rules = [
+    {"from_route": "/vb/<token>", "to_route": "vb"},
+]
+
+# ---------------------------------------------------------------------------
 # Installation
 # ---------------------------------------------------------------------------
 after_install = "vp.install.after_install"

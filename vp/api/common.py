@@ -67,7 +67,8 @@ def get_boot():
     roles = sorted(r for r in frappe.get_roles() if r.startswith("VP "))
 
     counts = {
-        "van_ban_hien_hanh": frappe.db.count("VP Van Ban", {"trang_thai": "Hien Hanh"}),
+        "van_ban_da_ban_hanh": frappe.db.count("VP Van Ban", {"trang_thai": "Da Ban Hanh"}),
+        "van_ban_cho_ban_hanh": frappe.db.count("VP Van Ban", {"trang_thai": "Da Cap So"}),
         "nvl_canh_bao": frappe.db.count(
             "VP Ho So NVL", {"trang_thai": ("in", ["Sap Het Han", "Het Han"])}
         ),

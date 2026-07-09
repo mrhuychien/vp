@@ -1,4 +1,4 @@
-import { call, uploadFile } from '../api.js';
+import { call } from '../api.js';
 import {
   html, raw, escapeHtml, badge, formatDate, skeleton, emptyState,
   toast, showModal, closeModal, showLoading, hideLoading,
@@ -6,7 +6,6 @@ import {
 
 const PAGE_SIZE = 20;
 
-// Build indented <option>s for the category tree (boot.danh_muc ordered by lft).
 function categoryOptions(danhMuc, selected) {
   const byName = {};
   danhMuc.forEach((d) => { byName[d.name] = d; });
@@ -16,7 +15,7 @@ function categoryOptions(danhMuc, selected) {
     return n;
   };
   return danhMuc.map((d) => {
-    const pad = '  '.repeat(depth(d));
+    const pad = '  '.repeat(depth(d));
     const sel = d.name === selected ? ' selected' : '';
     return `<option value="${escapeHtml(d.name)}"${sel}>${pad}${escapeHtml(d.ten_danh_muc)}</option>`;
   }).join('');
@@ -31,45 +30,41 @@ function options(items, valueKey, labelKey, selected, placeholder) {
 }
 
 export async function render({ container, query, boot, setTitle }) {
-  setTitle('Tra cứu văn bản');
+  setTitle('Văn bản');
   const canEdit = boot && boot.can_edit_vanban;
 
   const state = {
     keyword: query.kw || '',
     danh_muc: query.danh_muc || '',
     loai: query.loai || '',
-    phong_ban: query.phong_ban || '',
-    trang_thai: query.trang_thai || 'Hien Hanh',
+    trang_thai: query.trang_thai || '',
     page: 1,
   };
 
   container.innerHTML = html`<div class="vp-view-pad">
     <div class="vp-flex vp-items-center vp-justify-between vp-mb-2">
-      <div class="vp-view-banner-title" style="color:var(--vp-oxblood)!important;font-size:1.1rem">Tra cứu văn bản</div>
-      ${canEdit ? raw('<button class="vp-btn-primary vp-btn-sm" id="vp-add">+ Ban hành</button>') : ''}
+      <div class="vp-view-banner-title" style="color:var(--vp-oxblood)!important;font-size:1.1rem">Sổ văn bản</div>
+      ${canEdit ? raw('<button class="vp-btn-primary vp-btn-sm" id="vp-add">+ Cấp số</button>') : ''}
     </div>
 
     <form id="vp-search-form" class="vp-search-wrap">
       <span class="vp-search-icon">🔍</span>
-      <input class="vp-search" id="vp-kw" placeholder="Mã hiệu, tên văn bản, từ khóa…" value="${escapeHtml(state.keyword)}" />
+      <input class="vp-search" id="vp-kw" placeholder="Số, tên nội dung, nơi nhận, từ khóa…" value="${escapeHtml(state.keyword)}" />
     </form>
 
     <div class="vp-filters">
+      <select class="vp-select" id="vp-f-loai">
+        ${raw(options(boot.loai_van_ban, 'name', 'ten_loai', state.loai, '— Tất cả loại —'))}
+      </select>
       <select class="vp-select" id="vp-f-danhmuc">
         <option value="">— Tất cả danh mục —</option>
         ${raw(categoryOptions(boot.danh_muc, state.danh_muc))}
       </select>
-      <select class="vp-select" id="vp-f-loai">
-        ${raw(options(boot.loai_van_ban, 'name', 'ten_loai', state.loai, '— Tất cả loại —'))}
-      </select>
-      <select class="vp-select" id="vp-f-phongban">
-        ${raw(options(boot.phong_ban, 'name', 'department_name', state.phong_ban, '— Tất cả phòng —'))}
-      </select>
       <select class="vp-select" id="vp-f-trangthai">
-        <option value="Hien Hanh"${state.trang_thai === 'Hien Hanh' ? ' selected' : ''}>Hiện hành</option>
-        <option value="Du Thao"${state.trang_thai === 'Du Thao' ? ' selected' : ''}>Dự thảo</option>
-        <option value="Het Hieu Luc"${state.trang_thai === 'Het Hieu Luc' ? ' selected' : ''}>Hết hiệu lực</option>
-        <option value=""${state.trang_thai === '' ? ' selected' : ''}>Tất cả</option>
+        <option value=""${state.trang_thai === '' ? ' selected' : ''}>Tất cả (trừ hủy)</option>
+        <option value="Da Cap So"${state.trang_thai === 'Da Cap So' ? ' selected' : ''}>Đã cấp số</option>
+        <option value="Da Ban Hanh"${state.trang_thai === 'Da Ban Hanh' ? ' selected' : ''}>Đã ban hành</option>
+        <option value="Huy"${state.trang_thai === 'Huy' ? ' selected' : ''}>Hủy</option>
       </select>
     </div>
 
@@ -88,22 +83,23 @@ export async function render({ container, query, boot, setTitle }) {
       return;
     }
     if (!data.items.length) {
-      results.innerHTML = emptyState({ title: 'Không tìm thấy văn bản', hint: 'Thử đổi bộ lọc hoặc từ khóa.' });
+      results.innerHTML = emptyState({ title: 'Không có văn bản', hint: 'Bấm “+ Cấp số” để lập văn bản mới.' });
       return;
     }
     const rows = data.items.map((r) => html`
       <tr class="vp-row-click" data-name="${r.name}">
-        <td data-label="Mã hiệu"><strong>${r.ma_hieu}</strong></td>
-        <td data-label="Tên văn bản">${r.ten_van_ban}</td>
+        <td data-label="Số"><strong>${r.ma_hieu}</strong></td>
+        <td data-label="Tên nội dung">${r.ten_van_ban}</td>
         <td data-label="Loại">${r.loai_van_ban}</td>
-        <td data-label="Ban hành">${formatDate(r.ngay_ban_hanh_dau)}</td>
+        <td data-label="Ngày">${formatDate(r.ngay_ban_hanh)}</td>
+        <td data-label="Nơi nhận">${r.nguoi_nhan || '—'}</td>
         <td data-label="">${badge(r.trang_thai)}</td>
       </tr>`);
     const pages = Math.ceil(data.total / (data.page_size || PAGE_SIZE));
     results.innerHTML = html`
       <div class="vp-text-sm vp-text-muted vp-mb-2">${data.total} văn bản</div>
       <table class="vp-table"><thead><tr>
-        <th>Mã hiệu</th><th>Tên văn bản</th><th>Loại</th><th>Ban hành</th><th>Trạng thái</th>
+        <th>Số</th><th>Tên nội dung</th><th>Loại</th><th>Ngày</th><th>Nơi nhận</th><th>Trạng thái</th>
       </tr></thead><tbody>${rows}</tbody></table>
       ${pages > 1 ? raw(`
         <div class="vp-flex vp-items-center vp-justify-between vp-mt-3">
@@ -119,7 +115,6 @@ export async function render({ container, query, boot, setTitle }) {
     if (next) next.addEventListener('click', () => { state.page++; load(); });
   }
 
-  // Filter bindings.
   const kw = container.querySelector('#vp-kw');
   container.querySelector('#vp-search-form').addEventListener('submit', (e) => {
     e.preventDefault(); state.keyword = kw.value.trim(); state.page = 1; load();
@@ -127,104 +122,77 @@ export async function render({ container, query, boot, setTitle }) {
   const bind = (id, key) => container.querySelector(id).addEventListener('change', (e) => {
     state[key] = e.target.value; state.page = 1; load();
   });
-  bind('#vp-f-danhmuc', 'danh_muc');
   bind('#vp-f-loai', 'loai');
-  bind('#vp-f-phongban', 'phong_ban');
+  bind('#vp-f-danhmuc', 'danh_muc');
   bind('#vp-f-trangthai', 'trang_thai');
 
   const addBtn = container.querySelector('#vp-add');
-  if (addBtn) addBtn.addEventListener('click', () => openCreateModal(boot));
+  if (addBtn) addBtn.addEventListener('click', () => openCapSoModal(boot));
 
   await load();
 }
 
-// ── Create-document modal (US-01) ────────────────────────────────────────────
-function openCreateModal(boot) {
+// ── Cấp số modal (B1) ────────────────────────────────────────────────────────
+function openCapSoModal(boot) {
   showModal({
-    title: 'Ban hành văn bản',
+    title: 'Cấp số văn bản',
     body: html`
-      <form id="vp-create">
-        <div class="vp-req-note">Các trường có dấu <span class="vp-req">*</span> là bắt buộc. Phần còn lại có thể để trống.</div>
+      <form id="vp-capso">
+        <div class="vp-req-note">Nhập nội dung & loại → hệ thống tự cấp số và ngày. Sau đó vào chi tiết để ban hành (tải scan / dán link).</div>
 
-        <div class="vp-field"><label>Tên văn bản <span class="vp-req">*</span></label>
+        <div class="vp-field"><label>Tên nội dung <span class="vp-req">*</span></label>
           <input class="vp-input" name="ten_van_ban" required /></div>
         <div class="vp-field"><label>Loại văn bản <span class="vp-req">*</span></label>
           <select class="vp-select" name="loai_van_ban" required>
             ${raw(options(boot.loai_van_ban, 'name', 'ten_loai', '', '— Chọn loại —'))}
           </select></div>
-        <div class="vp-field"><label>Danh mục <span class="vp-req">*</span></label>
-          <select class="vp-select" name="danh_muc" required>
-            <option value="">— Chọn danh mục —</option>
-            ${raw(categoryOptions(boot.danh_muc, ''))}
-          </select></div>
-        <div class="vp-field"><label>Tệp chính (PDF đã ký) <span class="vp-req">*</span></label>
-          <input class="vp-input" type="file" name="tep_chinh" accept="application/pdf" required /></div>
-
-        <label class="vp-check-row"><input type="checkbox" name="set_hien_hanh" checked /> Ban hành & đặt hiện hành ngay</label>
+        <div class="vp-field"><label>Ngày</label>
+          <input class="vp-input" type="date" name="ngay_ban_hanh" />
+          <span class="vp-hint">Để trống sẽ tự lấy ngày hôm nay.</span></div>
+        <div class="vp-field"><label>Người nhận / Cơ quan nhận</label>
+          <textarea class="vp-textarea" name="nguoi_nhan" rows="2"></textarea></div>
 
         <details class="vp-optional">
           <summary>Thông tin bổ sung (tự chọn)</summary>
           <div class="vp-field"><label>Số văn bản</label>
             <input class="vp-input" name="ma_hieu" placeholder="Bỏ trống để tự cấp — VD: 01/2026-CV-HGC" /></div>
-          <div class="vp-field"><label>Ngày ban hành</label>
-            <input class="vp-input" type="date" name="ngay_ban_hanh" />
-            <span class="vp-hint">Để trống sẽ tự lấy ngày hôm nay khi ban hành.</span></div>
-          <div class="vp-field"><label>Số phiên bản đầu</label>
-            <input class="vp-input" name="so_phien_ban" value="1.0" /></div>
+          <div class="vp-field"><label>Danh mục</label>
+            <select class="vp-select" name="danh_muc"><option value="">— Không chọn —</option>${raw(categoryOptions(boot.danh_muc, ''))}</select></div>
           <div class="vp-field"><label>Phòng ban chủ quản</label>
-            <select class="vp-select" name="phong_ban">
-              ${raw(options(boot.phong_ban, 'name', 'department_name', '', '— Không chọn —'))}
-            </select></div>
-          <div class="vp-field"><label>Người soạn</label><input class="vp-input" name="nguoi_soan" /></div>
-          <div class="vp-field"><label>Người duyệt</label><input class="vp-input" name="nguoi_duyet" /></div>
+            <select class="vp-select" name="phong_ban">${raw(options(boot.phong_ban, 'name', 'department_name', '', '— Không chọn —'))}</select></div>
           <div class="vp-field"><label>Từ khóa (tra cứu)</label><input class="vp-input" name="tu_khoa" /></div>
-          <div class="vp-field"><label>Mô tả</label><textarea class="vp-textarea" name="mo_ta"></textarea></div>
-          <div class="vp-field"><label>Tệp gốc (Word/nguồn)</label>
-            <input class="vp-input" type="file" name="tep_goc" /></div>
+          <div class="vp-field"><label>Mô tả / Trích yếu</label><textarea class="vp-textarea" name="mo_ta"></textarea></div>
         </details>
       </form>`,
     footer: `
       <button class="vp-btn-ghost" data-vp-cancel>Hủy</button>
-      <button class="vp-btn-primary" id="vp-create-submit">Ban hành</button>`,
-    size: '',
+      <button class="vp-btn-primary" id="vp-capso-ok">Cấp số</button>`,
     onMount(root) {
       root.querySelector('[data-vp-cancel]').addEventListener('click', closeModal);
-      root.querySelector('#vp-create-submit').addEventListener('click', async () => {
-        const form = root.querySelector('#vp-create');
+      root.querySelector('#vp-capso-ok').addEventListener('click', async () => {
+        const form = root.querySelector('#vp-capso');
         if (!form.reportValidity()) return;
         const fd = new FormData(form);
-        const tepChinh = form.tep_chinh.files[0];
-        if (!tepChinh) { toast('Vui lòng chọn tệp chính (PDF).', 'error'); return; }
-        const tepGoc = form.tep_goc.files[0];
-
-        showLoading('Đang ban hành…');
+        showLoading('Đang cấp số…');
         try {
-          const payload = {
+          const res = await call('vp.api.vanban.cap_so', {
             ten_van_ban: fd.get('ten_van_ban'),
             loai_van_ban: fd.get('loai_van_ban'),
-            danh_muc: fd.get('danh_muc'),
-            phong_ban: fd.get('phong_ban') || null,
-            ma_hieu: fd.get('ma_hieu') || null,
-            so_phien_ban: fd.get('so_phien_ban') || '1.0',
             ngay_ban_hanh: fd.get('ngay_ban_hanh') || null,
-            nguoi_soan: fd.get('nguoi_soan') || null,
-            nguoi_duyet: fd.get('nguoi_duyet') || null,
+            nguoi_nhan: fd.get('nguoi_nhan') || null,
+            ma_hieu: fd.get('ma_hieu') || null,
+            danh_muc: fd.get('danh_muc') || null,
+            phong_ban: fd.get('phong_ban') || null,
             tu_khoa: fd.get('tu_khoa') || null,
             mo_ta: fd.get('mo_ta') || null,
-            set_hien_hanh: form.set_hien_hanh.checked ? 1 : 0,
-          };
-          const res = await call('vp.api.vanban.create_van_ban', payload);
-          await uploadFile({ file: tepChinh, doctype: 'VP Phien Ban Van Ban', docname: res.phien_ban, fieldname: 'tep_chinh' });
-          if (tepGoc) {
-            await uploadFile({ file: tepGoc, doctype: 'VP Phien Ban Van Ban', docname: res.phien_ban, fieldname: 'tep_goc' });
-          }
+          });
           hideLoading();
           closeModal();
-          toast('Đã ban hành ' + res.van_ban, 'success');
-          location.hash = '#/vanban/' + encodeURIComponent(res.van_ban);
+          toast('Đã cấp số ' + res.ma_hieu, 'success');
+          location.hash = '#/vanban/' + encodeURIComponent(res.name);
         } catch (e) {
           hideLoading();
-          toast(e.message || 'Ban hành thất bại', 'error');
+          toast(e.message || 'Cấp số thất bại', 'error');
         }
       });
     },

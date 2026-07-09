@@ -41,11 +41,11 @@ export async function call(method, args = {}) {
 
 // Upload a private file and (via fieldname) attach it to a doc field.
 // Uses XHR for real upload progress. Resolves with the file doc {file_url,...}.
-export function uploadFile({ file, doctype, docname, fieldname, onProgress }) {
+export function uploadFile({ file, doctype, docname, fieldname, isPrivate = 1, onProgress }) {
   return new Promise((resolve, reject) => {
     const fd = new FormData();
     fd.append('file', file, file.name);
-    fd.append('is_private', '1');
+    fd.append('is_private', isPrivate ? '1' : '0');
     fd.append('folder', 'Home');
     if (doctype) fd.append('doctype', doctype);
     if (docname) fd.append('docname', docname);

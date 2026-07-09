@@ -7,28 +7,38 @@ from frappe.utils import getdate, nowdate
 # organisation code ever changes.
 COMPANY_CODE = "HGC"
 
+DA_CAP_SO = "Da Cap So"
+DA_BAN_HANH = "Da Ban Hanh"
+HUY = "Huy"
+
 
 class VPVanBan(Document):
+    """Simplified issuance register: cấp số (assign number + date) -> ban hành
+    (attach scan / external link -> public link). One record per document, no
+    version sub-documents."""
+
     def before_insert(self):
-        # Auto-assign the document number when left blank. Runs BEFORE
-        # set_new_name, so the value set here becomes the document name
-        # (autoname = field:ma_hieu). Can be overridden by typing ma_hieu by hand.
+        # Step 1 "cấp số": assign the number + date the moment the record is
+        # created. ma_hieu can be overridden by typing it by hand.
         if not self.ma_hieu:
             self.ma_hieu = self._generate_ma_hieu()
+        if not self.ngay_cap_so:
+            self.ngay_cap_so = nowdate()
+        if not self.ngay_ban_hanh:
+            self.ngay_ban_hanh = self.ngay_cap_so
+        if not self.trang_thai:
+            self.trang_thai = DA_CAP_SO
 
     def _generate_ma_hieu(self):
-        """Build the next number in the form {seq:02d}/{year}-{prefix}-HGC,
-        e.g. 01/2026-CV-HGC. Sequence counts per (loại, năm)."""
+        """Next number in the form {seq:02d}/{year}-{prefix}-HGC (per loại, năm)."""
         prefix = (
             frappe.db.get_value("VP Loai Van Ban", self.loai_van_ban, "ma_viet_tat")
             or self.loai_van_ban
         )
-        year = getdate(nowdate()).year
+        year = getdate(self.ngay_ban_hanh or nowdate()).year
         suffix = "/{0}-{1}-{2}".format(year, prefix, COMPANY_CODE)
 
-        # Lock matching rows for the duration of this transaction to avoid two
-        # concurrent inserts picking the same sequence. The unique index on
-        # ma_hieu is the final backstop if a race still slips through.
+        # Row-lock matching numbers for this transaction; unique index backstops.
         rows = frappe.db.sql(
             """
             SELECT ma_hieu FROM `tabVP Van Ban`
@@ -45,10 +55,20 @@ class VPVanBan(Document):
                 max_seq = max(max_seq, int(head))
         return "{0:02d}{1}".format(max_seq + 1, suffix)
 
+    def ensure_public_token(self):
+        if not self.public_token:
+            self.public_token = frappe.generate_hash(length=24)
+        return self.public_token
+
+    def public_url(self):
+        if not self.public_token:
+            return None
+        return "{0}/vb/{1}".format(frappe.utils.get_url(), self.public_token)
+
     def on_trash(self):
-        # Never leave version records dangling.
-        n = frappe.db.count("VP Phien Ban Van Ban", {"van_ban": self.name})
-        if n:
+        # Keep the register intact: an issued document is cancelled ("Hủy"),
+        # not silently deleted.
+        if self.trang_thai == DA_BAN_HANH:
             frappe.throw(
-                _("Không thể xóa văn bản còn {0} phiên bản. Hãy xóa các phiên bản trước.").format(n)
+                _("Văn bản đã ban hành — hãy dùng 'Hủy' thay vì xóa để giữ sổ văn bản.")
             )

@@ -22,23 +22,12 @@ function nvlRow(r) {
     </a>`;
 }
 
-function vbLapseRow(r) {
+function vbRow(r) {
   return html`
     <a class="vp-list-row" href="#/vanban/${encodeURIComponent(r.name)}">
       <div class="vp-list-main">
         <div class="vp-list-title">${r.ma_hieu} — ${r.ten_van_ban}</div>
-        <div class="vp-list-sub">Hết hiệu lực ${formatDate(r.ngay_het_hieu_luc)} · còn ${r.days_left} ngày</div>
-      </div>
-      <div class="vp-chev">›</div>
-    </a>`;
-}
-
-function vbNewRow(r) {
-  return html`
-    <a class="vp-list-row" href="#/vanban/${encodeURIComponent(r.name)}">
-      <div class="vp-list-main">
-        <div class="vp-list-title">${r.ma_hieu} — ${r.ten_van_ban}</div>
-        <div class="vp-list-sub">${r.danh_muc || ''} · ${formatDate(r.ngay_ban_hanh_dau)}</div>
+        <div class="vp-list-sub">${r.loai_van_ban || ''} · ${formatDate(r.ngay_ban_hanh)}${r.nguoi_nhan ? ' · ' + r.nguoi_nhan : ''}</div>
       </div>
       <div class="vp-list-end">${badge(r.trang_thai)}</div>
     </a>`;
@@ -55,35 +44,31 @@ function section(title, rows, renderRow, emptyHint) {
 
 export async function render({ container, boot, setTitle }) {
   setTitle('Văn Phòng');
-  const c = boot ? boot.counts : { van_ban_hien_hanh: 0, nvl_canh_bao: 0, artwork: 0 };
+  const c = boot ? boot.counts : {};
 
-  container.innerHTML = `<div class="vp-view-pad" id="vp-dash">
+  container.innerHTML = html`<div class="vp-view-pad" id="vp-dash">
     <div class="vp-view-banner">
       <div>
         <div class="vp-view-banner-title">Xin chào${boot ? ', ' + escapeHtml(boot.full_name) : ''}</div>
-        <div class="vp-view-banner-subtitle">Kho văn bản, hồ sơ NVL & artwork — RVHG</div>
+        <div class="vp-view-banner-subtitle">Sổ văn bản, hồ sơ NVL & artwork — RVHG</div>
       </div>
       <div class="vp-view-banner-badge">ISO 22000</div>
     </div>
 
     <form id="vp-quick" class="vp-search-wrap">
       <span class="vp-search-icon">🔍</span>
-      <input class="vp-search" name="kw" placeholder="Tra cứu văn bản theo mã hiệu, tên, từ khóa…" />
+      <input class="vp-search" name="kw" placeholder="Tra cứu văn bản theo số, tên nội dung, nơi nhận…" />
     </form>
 
     <div class="vp-kpi-grid vp-mb-3">
-      ${statCard('Văn bản hiện hành', c.van_ban_hien_hanh, 'vp-brass')}
-      ${statCard('NVL cảnh báo', c.nvl_canh_bao, c.nvl_canh_bao ? 'vp-warning' : '')}
-      ${statCard('Artwork', c.artwork)}
-      <div class="vp-kpi-card" id="vp-kpi-lapse">
-        <div class="vp-kpi-label">Sắp hết hiệu lực</div>
-        <div class="vp-kpi-value">${skeleton(28)}</div>
-      </div>
+      ${statCard('VB đã ban hành', c.van_ban_da_ban_hanh || 0, 'vp-brass')}
+      ${statCard('Chờ ban hành', c.van_ban_cho_ban_hanh || 0, (c.van_ban_cho_ban_hanh ? 'vp-warning' : ''))}
+      ${statCard('NVL cảnh báo', c.nvl_canh_bao || 0, (c.nvl_canh_bao ? 'vp-warning' : ''))}
+      ${statCard('Artwork', c.artwork || 0)}
     </div>
-    <div id="vp-dash-body">${skeleton(90, 3)}</div>
+    <div id="vp-dash-body">${raw(skeleton(90, 3))}</div>
   </div>`;
 
-  // Quick search -> document list.
   container.querySelector('#vp-quick').addEventListener('submit', (e) => {
     e.preventDefault();
     const kw = e.target.kw.value.trim();
@@ -98,14 +83,9 @@ export async function render({ container, boot, setTitle }) {
     return;
   }
 
-  container.querySelector('#vp-kpi-lapse .vp-kpi-value').textContent = String(data.van_ban_sap_het_hieu_luc.length);
-  if (data.van_ban_sap_het_hieu_luc.length) {
-    container.querySelector('#vp-kpi-lapse .vp-kpi-value').classList.add('vp-warning');
-  }
-
   container.querySelector('#vp-dash-body').innerHTML =
     section('🔴 NVL đã hết hạn', data.nvl_het_han, nvlRow, 'Không có hồ sơ hết hạn.') +
     section('🟠 NVL sắp hết hạn (30 ngày)', data.nvl_sap_het_han, nvlRow, 'Không có hồ sơ sắp hết hạn.') +
-    section('⏳ Văn bản sắp hết hiệu lực (30 ngày)', data.van_ban_sap_het_hieu_luc, vbLapseRow, 'Không có văn bản sắp hết hiệu lực.') +
-    section('🆕 Văn bản mới ban hành (30 ngày)', data.van_ban_moi, vbNewRow, 'Chưa có văn bản mới.');
+    section('📝 Văn bản chờ ban hành', data.van_ban_cho_ban_hanh, vbRow, 'Không có văn bản chờ ban hành.') +
+    section('🆕 Văn bản mới ban hành (30 ngày)', data.van_ban_moi, vbRow, 'Chưa có văn bản mới.');
 }
