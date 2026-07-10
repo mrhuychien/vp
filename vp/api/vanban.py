@@ -48,6 +48,65 @@ def _public_url(token):
     return "{0}/vb/{1}".format(frappe.utils.get_url(), token) if token else None
 
 
+def _fetch_to_server(url):
+    """Download a direct-download URL into memory so it can be stored as a private
+    File. Throws (aborting ban hành) rather than leaving an un-counted external
+    link — the whole point is to keep the view/download limit enforceable."""
+    import ipaddress
+    import mimetypes
+    from urllib.parse import urlparse, unquote
+
+    parsed = urlparse(url)
+    if parsed.scheme not in ("http", "https"):
+        frappe.throw(_("Link phải bắt đầu bằng http:// hoặc https://."))
+
+    host = (parsed.hostname or "").lower()
+    if host == "localhost":
+        frappe.throw(_("Link nội bộ không được phép."))
+    try:
+        ip = ipaddress.ip_address(host)
+        if ip.is_private or ip.is_loopback or ip.is_link_local or ip.is_reserved:
+            frappe.throw(_("Link nội bộ không được phép."))
+    except ValueError:
+        pass  # hostname, not an IP literal
+
+    try:
+        import requests
+        resp = requests.get(url, timeout=30, stream=True, allow_redirects=True)
+        resp.raise_for_status()
+    except frappe.ValidationError:
+        raise
+    except Exception as e:
+        frappe.throw(
+            _("Không tải được tệp từ link ({0}). Hãy dùng link tải trực tiếp hoặc tải tệp lên trực tiếp.").format(
+                str(e)[:120]
+            )
+        )
+
+    MAX = 50 * 1024 * 1024
+    buf = bytearray()
+    for chunk in resp.iter_content(65536):
+        buf += chunk
+        if len(buf) > MAX:
+            frappe.throw(_("Tệp quá lớn (>50MB)."))
+    content = bytes(buf)
+    if not content:
+        frappe.throw(_("Link không trả về nội dung tệp."))
+
+    fname = None
+    cd = resp.headers.get("Content-Disposition", "") or ""
+    if "filename=" in cd:
+        fname = cd.split("filename=")[-1].strip().strip('"; ')
+    if not fname:
+        fname = unquote((parsed.path or "").rsplit("/", 1)[-1])
+    if not fname:
+        fname = "vanban"
+    if "." not in fname:
+        ctype = (resp.headers.get("Content-Type", "") or "").split(";")[0].strip()
+        fname += mimetypes.guess_extension(ctype) or ""
+    return fname, content
+
+
 def _subtree_names(danh_muc):
     node = frappe.db.get_value("VP Danh Muc", danh_muc, ["lft", "rgt"], as_dict=True)
     if not node:
@@ -155,10 +214,30 @@ def ban_hanh(name, lien_ket_ngoai=None):
     public token and returns the externally-accessible /vb/<token> URL."""
     _require("VP Bien Tap")
     doc = frappe.get_doc("VP Van Ban", name)
-    if lien_ket_ngoai is not None:
-        doc.lien_ket_ngoai = (lien_ket_ngoai or "").strip() or None
-    if not (doc.tep_dinh_kem or doc.lien_ket_ngoai):
-        frappe.throw(_("Cần tải tệp scan đã đóng dấu hoặc dán liên kết ngoài trước khi ban hành."))
+
+    # A pasted link is downloaded INTO our server (private File) so the view/
+    # download limit stays enforceable — leaving a raw external link would bypass
+    # the 5-access counter entirely.
+    link = lien_ket_ngoai if lien_ket_ngoai is not None else doc.lien_ket_ngoai
+    link = (link or "").strip() or None
+    if link and not doc.tep_dinh_kem:
+        fname, content = _fetch_to_server(link)
+        file_doc = frappe.get_doc(
+            {
+                "doctype": "File",
+                "file_name": fname,
+                "attached_to_doctype": "VP Van Ban",
+                "attached_to_name": doc.name,
+                "attached_to_field": "tep_dinh_kem",
+                "is_private": 1,
+                "content": content,
+            }
+        ).insert(ignore_permissions=True)
+        doc.tep_dinh_kem = file_doc.file_url
+        doc.lien_ket_ngoai = None  # replaced by the downloaded copy
+
+    if not doc.tep_dinh_kem:
+        frappe.throw(_("Cần tải tệp scan hoặc dán link tải trực tiếp trước khi ban hành."))
     if not doc.ngay_ban_hanh:
         doc.ngay_ban_hanh = frappe.utils.nowdate()
     doc.reset_access()  # ensure token + counter 0 + default limit

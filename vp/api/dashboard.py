@@ -67,12 +67,17 @@ def get_dashboard():
     )
 
     # ── Issued-document counts per category ──
-    theo_danh_muc = frappe.get_all(
-        "VP Van Ban",
-        filters={"trang_thai": "Da Ban Hanh"},
-        fields=["danh_muc", "count(name) as n"],
-        group_by="danh_muc",
-        order_by="n desc",
+    # Raw SQL: frappe.get_all (v16) rejects aggregate functions passed as field
+    # strings; a GROUP BY count is clearest done directly.
+    theo_danh_muc = frappe.db.sql(
+        """
+        SELECT danh_muc, COUNT(name) AS n
+        FROM `tabVP Van Ban`
+        WHERE trang_thai = 'Da Ban Hanh' AND danh_muc IS NOT NULL
+        GROUP BY danh_muc
+        ORDER BY n DESC
+        """,
+        as_dict=True,
     )
 
     return {

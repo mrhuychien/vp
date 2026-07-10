@@ -124,11 +124,12 @@ function openBanHanh(vb, onDone) {
     title: 'Ban hành ' + vb.ma_hieu,
     body: html`
       <form id="vp-bh">
-        <div class="vp-req-note">Chọn <b>một</b> trong hai: tải tệp scan đã đóng dấu, hoặc dán liên kết ngoài. Ban hành sẽ tạo link truy cập từ bên ngoài.</div>
+        <div class="vp-req-note">Chọn <b>một</b> trong hai. Ban hành sẽ tạo link + QR giới hạn ${vb.gioi_han_truy_cap || 5} lượt xem/tải.</div>
         <div class="vp-field"><label>Tệp scan đã đóng dấu (PDF/ảnh)</label>
           <input class="vp-input" type="file" name="tep" accept="application/pdf,image/*" /></div>
-        <div class="vp-field"><label>Hoặc dán liên kết ngoài</label>
-          <input class="vp-input" name="lien_ket_ngoai" placeholder="https://…" value="${escapeHtml(vb.lien_ket_ngoai || '')}" /></div>
+        <div class="vp-field"><label>Hoặc dán link tải trực tiếp</label>
+          <input class="vp-input" name="lien_ket_ngoai" placeholder="https://… (link tải trực tiếp ra file)" value="${escapeHtml(vb.lien_ket_ngoai || '')}" />
+          <span class="vp-hint">Hệ thống sẽ <b>tải file về máy chủ</b> để áp giới hạn lượt truy cập (link phải tải thẳng ra file, không phải trang xem của Drive).</span></div>
       </form>`,
     footer: `<button class="vp-btn-ghost" data-vp-cancel>Hủy</button><button class="vp-btn-primary" id="vp-bh-ok">Ban hành</button>`,
     onMount(root) {

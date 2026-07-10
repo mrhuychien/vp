@@ -59,13 +59,18 @@ def list_artworks(item=None, loai_bao_bi=None, keyword=None):
 
     names = [a.name for a in arts]
 
-    # Version counts per artwork (one query).
+    # Version counts per artwork (one query). Raw SQL: frappe.get_all (v16)
+    # rejects aggregate functions passed as field strings.
     counts = {}
-    for row in frappe.get_all(
-        "VP Phien Ban Artwork",
-        filters={"artwork": ("in", names)},
-        fields=["artwork", "count(name) as n"],
-        group_by="artwork",
+    for row in frappe.db.sql(
+        """
+        SELECT artwork, COUNT(name) AS n
+        FROM `tabVP Phien Ban Artwork`
+        WHERE artwork IN %(names)s
+        GROUP BY artwork
+        """,
+        {"names": tuple(names)},
+        as_dict=True,
     ):
         counts[row.artwork] = row.n
 
