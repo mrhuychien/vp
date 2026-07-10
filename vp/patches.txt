@@ -1,4 +1,4 @@
 [pre_model_sync]
-vp.patches.remove_phien_ban_van_ban
 
 [post_model_sync]
+vp.patches.remove_phien_ban_van_ban
